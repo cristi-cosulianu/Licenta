@@ -1,0 +1,19 @@
+#!/bin/bash -e
+
+BASE=$(dirname $0)
+
+rm -rf temp 
+ocropus-nlbin $BASE/tests/real_receipt.jpg -n -o temp
+ocropus-gpageseg -n --threshold 0.3 'temp/????.bin.png'
+# python letter_splitter.py
+
+
+
+# ocropus-rpred -n 'temp/????/??????.bin.png'
+# ocropus-hocr 'temp/????.bin.png' -o temp.html
+# ocropus-visualize-results temp
+# ocropus-gtedit html temp/????/??????.bin.png -o temp-correction.html
+
+# echo "to see recognition results, type: firefox temp.html"
+# echo "to see correction page, type: firefox temp-correction.html"
+# echo "to see details on the recognition process, type: firefox temp/index.html"
