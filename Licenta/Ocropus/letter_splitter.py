@@ -1,7 +1,7 @@
 from PIL import Image
 import sys, os
 
-directory = "./temp/0001"
+directory = "E:/GitHub/Licenta/Licenta/Ocropus/temp/0001"
 
 for file in os.listdir(directory):
     file = os.path.join(directory, file)
@@ -43,7 +43,7 @@ for file in os.listdir(directory):
         if (sum_arr[i] < average / 10):
             space_indexs.append(i)
 
-    # Exclude consecudive indexes.
+    # Exclude consecutive indexes.
     i = 0
     while(i < len(space_indexs) - 1):
         if space_indexs[i] + 1 == space_indexs[i + 1]:

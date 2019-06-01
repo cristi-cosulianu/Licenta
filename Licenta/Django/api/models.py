@@ -27,6 +27,3 @@ class BillsToPayments(models.Model):
     bill = models.ForeignKey(Bills, on_delete = models.CASCADE)
     payment = models.ForeignKey(Payments, on_delete = models.CASCADE)
 
-class ImagePost(models.Model):
-    title = models.CharField(max_length=120)
-    content = models.ImageField(null=True, blank=True)

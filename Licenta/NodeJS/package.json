@@ -1,0 +1,23 @@
+{
+  "name": "mbsserver",
+  "version": "1.0.0",
+  "description": "A Node.js server for Mobile Bill Splitter",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "author": "Cosulianu Cristi-Mihail",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.16.2",
+    "mongoose": "^5.5.9",
+    "morgan": "^1.9.1",
+    "multer": "^1.4.1",
+    "ngrok": "^3.1.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.0"
+  }
+}

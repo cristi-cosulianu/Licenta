@@ -7,7 +7,5 @@ urlpatterns = [
     # ex: /mbsapi/persons/1
     path('persons/<int:person_id>/', views.person, name = 'person'),
     # ex: /mbsapi/persons/1/name/
-    path('persons/<int:person_id>/name/', views.person_name, name='person_name'),
-    # ex: /mbsapi/image/
-    path('image/', views.image, name='image')
+    path('persons/<int:person_id>/name/', views.person_name, name='person_name')
 ]

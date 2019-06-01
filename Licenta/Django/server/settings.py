@@ -25,7 +25,7 @@ SECRET_KEY = '5ns(5!@8!z+z%x81qpl8t0-%2w()kbdp-m+*gzgffhl*7@5--@'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["192.168.0.100", "192.168.43.103", "192.168.43.105", "10.0.2.15",'127.0.0.1', "0.0.0.0"]
+ALLOWED_HOSTS = ["192.168.43.168", "10.0.2.15",'127.0.0.1']
 
 # Application definition
 
@@ -36,27 +36,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'mbsapi.apps.MbsapiConfig',
-    'rest_framework'
-    # 'django-extra-fields'
+    'mbsapi.apps.MbsapiConfig'
 ]
 
 MIDDLEWARE = [
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    # 'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'mbsserver.urls'
-
-MEDIA_URL =  '/media/'
-
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 TEMPLATES = [
     {

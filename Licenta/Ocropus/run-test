@@ -5,7 +5,7 @@ BASE=$(dirname $0)
 rm -rf temp 
 ocropus-nlbin $BASE/tests/real_receipt.jpg -n -o temp
 ocropus-gpageseg -n --threshold 0.3 'temp/????.bin.png'
-# python letter_splitter.py
+python letter_splitter.py
 
 
 

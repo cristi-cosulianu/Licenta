@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from .models import Persons, Bills, Payments, BillsToPayments, PaymentsStatus
-from django.views.generic import TemplateView
+
+
 
 # Auxiliar functions.
 
@@ -12,6 +13,8 @@ def updatePersonsDict():
     for person in persons:
         personsDict[person.id] = person.name
 
+
+
 # Views.
 
 def index(request):
@@ -19,14 +22,14 @@ def index(request):
 
 def person(request, person_id):
     updatePersonsDict()
-    person = dict()
+    data = dict()
     for key, value in personsDict.items():
         if key == person_id:
             person = dict()
             person["id"] = str(key)
             person["name"] = str(value)
-        #     data[key] = person
-    return JsonResponse(person)
+            data[key] = person
+    return JsonResponse(data)
 
 def person_name(request, person_id):
     updatePersonsDict()
@@ -36,5 +39,9 @@ def person_name(request, person_id):
             output += "Name: " + value + " "
     return HttpResponse(output)
 
-def image(request):
-    return render(request, 'upload.html')
+
+# USE THIS TO FIND FIELD NAMES
+#
+# output = ""
+# for f in Payments._meta.get_fields():
+#     output += f.name + " "
