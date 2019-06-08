@@ -24,9 +24,9 @@ Descrierea sumara a solutiei - o pagina din care sa se inteleaga in mare cum fun
 
 Descrierea problemei - ce zic oamenii despre asta, 
                      - media persoanelor care merg la restaurant
-                    - cat de des ar fi utila
-                    - alte aplicatii care fac asta
-                    - 3 pagini
+                     - cat de des ar fi utila
+                     - alte aplicatii care fac asta
+                     - 3 pagini
 
 Related work - paperuri cu cum au rezolvat altii
              - 5 pagini, cum au facut ei, cum sunt eu diferit fata de ei 
