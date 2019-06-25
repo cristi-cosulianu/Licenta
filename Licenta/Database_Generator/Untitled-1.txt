@@ -10,30 +10,30 @@ DOCUMENTATIE:
 Abstract - ai, rn, istorie, clasificare 10 pagini
             - 5 pagini - tehnologii folosite, nodejs, keras, ...
 
-Introducere - de ce am ales tema 2 pagini
-            - gradul de noutate
-            - necesitate
-            - ce problema rezolva in princiupiu
+        Introducere - de ce am ales tema 2 pagini
+                - gradul de noutate
+                - necesitate
+                - ce problema rezolva in princiupiu
 
-Obiectivul proiectului - o pagina 
+        Obiectivul proiectului - o pagina 
 
-Metodologia folosita - 2 pagini
+        Metodologia folosita - 2 pagini
 
-Descrierea sumara a solutiei - o pagina din care sa se inteleaga in mare cum functioneaza.
-                            - recomandari de salvat
+        Descrierea sumara a solutiei - o pagina din care sa se inteleaga in mare cum functioneaza.
+                                - recomandari de salvat
 
-Descrierea problemei - ce zic oamenii despre asta, 
-                     - media persoanelor care merg la restaurant
-                     - cat de des ar fi utila
-                     - alte aplicatii care fac asta
-                     - 3 pagini
+        Descrierea problemei - ce zic oamenii despre asta, 
+                        - media persoanelor care merg la restaurant
+                        - cat de des ar fi utila
+                        - alte aplicatii care fac asta
+                        - 3 pagini
 
 Related work - paperuri cu cum au rezolvat altii
              - 5 pagini, cum au facut ei, cum sunt eu diferit fata de ei 
 
 Desrierea solutiei - 14 pagini  nu e bai daca e mai mult
-- partea de user mode - din partea clientului ce posibilitati are / functionalitati ale aplicatiei
-- din partea de backend, cum am facut eu comunicarea, unde e pus cum se identifica
+        - partea de user mode - din partea clientului ce posibilitati are / functionalitati ale aplicatiei
+        - din partea de backend, cum am facut eu comunicarea, unde e pus cum se identifica
 - partea de ML de recunoscut bonuri - alg de recunoastere a textului di bonuri 
                                     - si rezultatele de la antrenamente daca am facute mai multe
 

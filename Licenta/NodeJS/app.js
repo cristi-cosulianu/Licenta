@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 
 const personsRoutes = require('./api/routes/persons');
 const billsRoutes = require('./api/routes/bills');
+const paymentsRoutes = require('./api/routes/payments');
 const scriptRoutes = require('./api/routes/runscript');
 
 mongoose.connect('mongodb+srv://admin:admin@mbsdatabase-iowya.mongodb.net/test?retryWrites=true', {
@@ -38,6 +39,7 @@ app.use((req, res, next) => {
 // Routes which should handle requests.
 app.use('/persons', personsRoutes);
 app.use('/bills', billsRoutes);
+app.use('/payments', paymentsRoutes);
 app.use('/runscript', scriptRoutes);
 
 

@@ -17,6 +17,7 @@ const upload = multer({ storage: storage });
 
 const Bill = require("../models/bill");
 const Person = require("../models/person");
+const Payment = require("../models/payment");
 
 
 router.get('/', (req, res, next) => {
@@ -45,12 +46,68 @@ router.get('/', (req, res, next) => {
 });
 
 router.get('/:billId', (req, res, next) => {
+    // Select the bill id from url parameters.
     const id = req.params.billId;
+    // Find bill by id if it exists in database.
     Bill.findById(id).exec()
-    .then(doc => {
-        console.log("From database:", doc);
-        if (doc) {
-            res.status(200).json(doc);
+    .then(bill => {
+        // console.log("From database:", bill);
+        // If bill exist and is not null.
+        if (bill) {
+            // Find payments that are assigned to this bill.
+            Payment.find( {billId: bill._id} ).exec()
+            .then(payments => {
+                // Map payments without billId.
+                responsePaymentsList = payments.map(payment => {
+                    return {
+                        paymentId: payment._id,
+                        productName: payment.productName,
+                        productPrice: payment.productPrice,
+                        payerId: payment.payerId
+                    }
+                });
+
+                // Select person id from payments.
+                let personsIdsList = []
+                for (let i = 0; i < responsePaymentsList.length; i++) {
+                    personsIdsList.push(responsePaymentsList[i].payerId);
+                }
+
+                console.log(personsIdsList);
+
+                Person.find( {_id: { $in: personsIdsList} } ).exec()
+                .then(persons => {
+
+                    responsePersonsList = persons.map(person => {
+                        return {
+                            id: person._id,
+                            name: person.name
+                        }
+                    });
+
+                    // Create bill objects for response.
+                    const responseBill = {
+                        billId: bill._id,
+                        billTitle: bill.title,
+                        initiatorId: bill.initiator,
+                        paymentToPersonsList: [],
+                        paymentsList: responsePaymentsList,
+                        personsList: bill.persons
+                    }
+                    res.status(200).json(responseBill);
+                })
+                .catch(err => {
+                    res.status(500).json({
+                        message: "Internal error" + err
+                    });
+                });
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    message: "Internal error" + err
+                });
+            });
         } else {
             res.status(404).json({
                 message: "No valid entry for provided ID:" + id
@@ -67,23 +124,68 @@ router.get('/:billId', (req, res, next) => {
 
 
 router.post('/', (req, res, next) => {
-    const initiatorId = req.body.initiator;
+    const initiatorId = req.body.initiatorId;
+    console.log("initiatorId: " + req.body.initiatorId + '\n');
+
     // Check if the initiator exist.
     Person.findById(initiatorId)
     .then(person => {
         const bill = new Bill({
-            initiator: initiatorId,
-            title: req.body.title,
-            date: req.body.date
+            initiator: req.body.initiatorId,
+            title: req.body.billTitle,
+            persons: req.body.personsList
         });
-    
+        console.log("bill: " + bill.title + '\n');
+        console.log("initiator: " + bill.initiator + '\n');
+
+        // Save new bill in database.
         return bill.save()
-        .then(result => {
-            console.log(result);
-            res.status(201).json({
-                _id: result._id,
-                initiator: result.initiator
+        .then(billResult => {
+            console.log("billResult: " + billResult + '\n');
+
+            // Create payments for current bill.
+            const paymentsList = [];
+            for (let i = 0; i < req.body.paymentsList.length; i++) {
+                const payment = new Payment({
+                    billId: billResult._id,
+                    productName: req.body.paymentsList[i].productName,
+                    productPrice: req.body.paymentsList[i].productPrice
+                });
+                paymentsList.push(payment);
+            }
+            
+            Payment.insertMany(paymentsList)
+            .then(results => {
+
+                resultPaymentsList = results.map(result => {
+                    return {
+                        paymentId: result._id,
+                        productName: result.productName,
+                        productPrice: result.productPrice,
+                        payerId: result.payerId
+                    }
+                })
+
+                const responseObj = {
+                    billId: billResult._id,
+                    billTitle: billResult.title,
+                    initiatorId: billResult.initiator,
+                    paymentToPersonsList: [],
+                    paymentsList: resultPaymentsList,
+                    personsList: req.body.personsList
+                }
+
+                res.status(201).json(responseObj);
+                console.log("responseObj: " + responseObj + '\n');
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    error: err
+                });
             });
+
+
         })
         .catch(err => {
             console.log(err);
@@ -93,13 +195,35 @@ router.post('/', (req, res, next) => {
         });
     })
     .catch(err => {
-        res.status(500).json({
+        console.log(err);
+        res.status(404).json({
             message: "No initiator with id: " + initiatorId,
             error: err
         });
     })
 });
 
+
+router.delete('/all', (req, res, next) => {
+    Bill.find().exec()
+    .then(docs => {
+        console.log(docs);
+        Bill.deleteMany({}).exec().then(result => {
+            res.status(200).json(result);
+        }).catch(err => {
+            console.log(err);
+            res.status(500).json({
+                error: err
+            })
+        });
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json({
+            error: err
+        })
+    });
+});
 
 router.delete('/:billId', (req, res, next) => {
     const id = req.params.billId;
@@ -114,5 +238,6 @@ router.delete('/:billId', (req, res, next) => {
         })
     });
 });
+
 
 module.exports = router;
