@@ -45,6 +45,71 @@ router.get('/', (req, res, next) => {
     });
 });
 
+router.get('/initiator/:initiatorId', (req, res, next) => {
+    // Select the bill id from url parameters.
+    const initiatorId = req.params.initiatorId;
+    Bill.find({ initiator: initiatorId}).exec()
+    .then(bills => {
+        let billsIds = []
+        for (let i = 0; i < bills.length; i++) {
+            billsIds.push(bills[i]._id);
+        }
+        Payment.find({billId: { $in: billsIds} }).exec()
+        .then(payments => {
+            let personsIdsList = []
+            for (let i = 0; i < payments.length; i++) {
+                personsIdsList.push(payments[i].payerId);
+            }
+            Person.find( {_id: { $in: personsIdsList} } ).exec()
+            .then(persons => {
+
+
+                const responseBillsList = bills.map(bill => {
+                    const selectedPayments = selectPayments(payments, bill._id);
+                    const result = selectPersons(selectedPayments, persons);
+                    const selectedPersons = result[0];
+                    const paymentToPersonsList = result[1];
+                    return {
+                        billId: bill._id,
+                        billTitle: bill.title,
+                        initiatorId: bill.initiator,
+                        paymentToPersonsList: paymentToPersonsList,
+                        paymentsList: mapPayments(selectedPayments),
+                        personsList: mapPersons(selectedPersons)
+                    }
+                });
+
+                res.status(200).json({
+                    bills: responseBillsList,
+                    payments: payments,
+                    persons: persons
+                });
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    error: err
+                });
+            });  
+
+
+         
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                error: err
+            });
+        });       
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json({
+            error: err
+        });
+    });
+});
+
 router.get('/:billId', (req, res, next) => {
     // Select the bill id from url parameters.
     const id = req.params.billId;
@@ -241,3 +306,64 @@ router.delete('/:billId', (req, res, next) => {
 
 
 module.exports = router;
+
+function selectPayments(payments, billId) {
+
+    let selectedPayments = [];
+    for (let i = 0; i < payments.length; i++) {
+        if ("" + payments[i].billId == "" + billId) {
+            selectedPayments.push(payments[i]);
+        }
+    }
+    return selectedPayments;
+} 
+
+function selectPersons(payments, persons) {
+    let selectedPersons = [];
+    let paymentsToPersons = [];
+    for (let i = 0; i < payments.length; i++) {
+        for (let j = 0; j < persons.length; j++) {
+            if ("" + persons[j]._id == "" + payments[i].payerId) {
+                selectedPersons.push(persons[j]);
+                paymentsToPersons.push({
+                    payment: mapPayment(payments[i]),
+                    person: mapPerson(persons[j])
+                })
+            }
+        }
+    }
+    return [selectedPersons, paymentsToPersons];
+}
+
+function mapPayments(payments) {
+    const mapedPayments =  payments.map(payment => {
+       return mapPayment(payment);
+    });
+    return mapedPayments;
+}
+
+function mapPersons(persons) {
+    return persons.map(person => {
+        return mapPerson(person);
+    });
+}
+
+function mapPayment(payment) {
+    if (payment) {
+        return {
+            paymentId: payment._id,
+            productName: payment.productName,
+            productPrice: payment.productPrice,
+            payerId: payment.payerId
+        }
+    }
+}
+
+function mapPerson(person) {
+    if (person) {
+        return {
+            id: person._id,
+            name: person.name
+        }
+    }
+}
