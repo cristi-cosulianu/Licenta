@@ -7,8 +7,6 @@ test_chars_dir_name = "Chars_test"
 
 alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.=:/+-*"
 
-alphabet = "0123456789"
-
 marks_dict = {
     ".": "_point",
     "=": "_equal",
@@ -221,5 +219,5 @@ def main(chars_dir_name, NR_INSTANCES):
             image.save(os.path.join(char_dir_name, filename))
         
 if __name__ == "__main__":
-    main(train_chars_dir_name, 1000)
-    main(test_chars_dir_name, 100)
+    main(train_chars_dir_name, 1)
+    # main(test_chars_dir_name, 100)
