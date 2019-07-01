@@ -76,13 +76,12 @@ router.post("/name/:personName", (req, res, next) => {
                 name: proposedName
             });
             // Store person and respond with person object created.
-            person
-            .save()
+            person.save()
             .then(result => {
                 console.log(result);
                 res.status(201).json({
                     name: result.name,
-                    _id: result._id,
+                    id: result._id,
                 });
             })
             .catch(err => {

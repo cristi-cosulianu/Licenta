@@ -33,7 +33,70 @@ router.get('/', (req, res, next) => {
     });
 });
 
-router.get('/:paymentId', (req, res, next) => {
+router.get('/person/:personId', (req, res, next) => {
+    const personId = req.params.personId;
+    Person.findById(personId).exec()
+    .then(person => {
+        console.log(person);
+        Payment.find({ payerId: personId }).exec()
+        .then(payments => {
+            console.log(payments);
+            let billsIdsSet = new Set([]);
+            for (let i = 0; i < payments.length; i++) {
+                billsIdsSet.add("" + payments[i].billId);
+            }
+            const billsIdsList = Array.from(billsIdsSet);
+            console.log(billsIdsList);
+            let personsIdsSet = new Set([]);
+            for (let i = 0; i < payments.length; i++) {
+                personsIdsSet.add("" + payments[i].payerId);
+            }
+            const personsIdsList = Array.from(personsIdsSet);
+            Person.find( {_id: { $in: personsIdsList} } ).exec()
+            .then(persons => {
+                console.log(billsIdsList);
+                Bill.find({_id: { $in: billsIdsList} })
+                .populate("initiator", "name")
+                .exec()
+                .then(bills => {
+                    console.log(bills);
+                    const responseBillsList = bills.map(bill => {
+                        const selectedPayments = selectPayments(payments, bill._id);
+                        const result = selectPersons(selectedPayments, persons);
+                        const selectedPersons = Array.from(new Set(result[0]));
+                        const paymentToPersonList = result[1];
+                        return {
+                            billId: bill._id,
+                            billTitle: bill.title,
+                            initiator: mapPerson(bill.initiator),
+                            paymentToPersonList: paymentToPersonList,
+                            paymentsList: mapPayments(selectedPayments),
+                            personsList: mapPersons(selectedPersons)
+                        }
+                    });
+
+                    res.status(200).json({
+                        bills: responseBillsList,
+                    });
+                })
+                .catch(err => {
+                    respondWithError(err, res);
+                });
+            })
+            .catch(err => {
+                respondWithError(err, res);
+            });
+        })
+        .catch(err => {
+            respondWithError(err, res);
+        })
+    })
+    .catch(err => {
+        respondWithError(err, res);
+    });
+});
+
+router.get('/payment/:paymentId', (req, res, next) => {
     const id = req.params.paymentId;
     Payment.findById(id).exec()
     .then(doc => {
@@ -56,21 +119,18 @@ router.get('/:paymentId', (req, res, next) => {
 
 
 router.post('/', (req, res, next) => {
-    const initiatorId = req.body.initiatorId;
+    const initiator = req.body.initiator;
 
     // Check if the initiator exist.
-    Person.findById(initiatorId)
+    Person.findById(initiator)
         .then(person => {
         const bill = new Bill({
-            initiator: person._id,
+            initiator: person,
             title: req.body.title,
             date: req.body.date
         });
 
         console.log(req.body.paymentsList);
-        // for (payment in paymentsList) {
-        //     const 
-        // }
 
         return bill.save()
         .then(result => {
@@ -78,7 +138,7 @@ router.post('/', (req, res, next) => {
             res.status(201).json({
                 billId: result._id,
                 billTitle: result.title,
-                initiatorName: initiatorId,
+                initiator: result.initiator,
                 paymentToPersonsList: [],
                 paymentsList: [],
                 personsList: []
@@ -97,6 +157,97 @@ router.post('/', (req, res, next) => {
             error: err
         });
     })
+});
+
+router.put('/payer', (req, res, next) => {
+    console.log("AJUNG AICI");
+    const paymentToPersonList = req.body;
+    const payerId = paymentToPersonList[0].person.id;
+    const payerName = paymentToPersonList[0].person.name;
+
+
+    let paymentIdsList = []
+    for (let i = 0; i < paymentToPersonList.length; i++) {
+        const payment = paymentToPersonList[i].payment;
+        paymentIdsList.push(payment.paymentId);
+    }
+
+
+    Payment.updateMany({_id: { $in: paymentIdsList} }, { $set: {"payerId": payerId} }).exec()
+    .then(result => {
+        Payment.findById(paymentIdsList[0]).exec()
+        .then(payment => {
+            Bill.findById(payment.billId)
+            .populate("initiator", "name")
+            .exec()
+            .then(bill => {
+                // console.log("From database:", bill);
+                // If bill exist and is not null.
+                if (bill) {
+                    // Find payments that are assigned to this bill.
+                    Payment.find( {billId: bill._id} ).exec()
+                    .then(payments => {
+                        // Map payments without billId.
+                        responsePaymentsList = mapPayments(payments);
+        
+                        // Select person id from payments.
+                        let personsIdsList = []
+                        for (let i = 0; i < responsePaymentsList.length; i++) {
+                            personsIdsList.push(responsePaymentsList[i].payerId);
+                        }
+        
+                        console.log(personsIdsList);
+        
+                        Person.find( {_id: { $in: personsIdsList} } ).exec()
+                        .then(persons => {
+        
+                            responsePersonsList = mapPersons(persons);
+        
+                            const bills = [bill];
+                            const responseBillsList = bills.map(bill => {
+                                const selectedPayments = selectPayments(payments, bill._id);
+                                const result = selectPersons(selectedPayments, persons);
+                                const selectedPersons = Array.from(new Set(result[0]));
+                                const paymentToPersonList = result[1];
+                                console.log("Payment to person list: \n" + paymentToPersonList);
+                                return {
+                                    billId: bill._id,
+                                    billTitle: bill.title,
+                                    initiator: bill.initiator,
+                                    paymentToPersonList: paymentToPersonList,
+                                    paymentsList: mapPayments(selectedPayments),
+                                    personsList: mapPersons(selectedPersons)
+                                }
+                            });
+            
+                            res.status(200).json(responseBillsList[0]);
+                        })
+                        .catch(err => {
+                            res.status(500).json({
+                                message: "Internal error" + err
+                            });
+                        });
+                    })
+                    .catch(err => {
+                        respondWithError(err, res);
+                    });
+                } else {
+                    res.status(404).json({
+                        message: "No valid entry for provided ID:" + id
+                    });
+                }
+            })
+            .catch(err => {
+                respondWithError(err, res);
+            });
+        })
+        .catch(err => {
+            respondWithError(err, res);
+        });
+    })
+    .catch(err => {
+        respondWithError(err, res);
+    });
 });
 
 router.put('/:paymentId', (req, res, next) => {
@@ -156,3 +307,75 @@ router.delete('/:paymentId', (req, res, next) => {
 });
 
 module.exports = router;
+
+
+
+
+
+function respondWithError(err, res) {
+    console.log(err);
+    res.status(500).json({
+        error: err
+    });
+}
+
+function selectPayments(payments, billId) {
+
+    let selectedPayments = [];
+    for (let i = 0; i < payments.length; i++) {
+        if ("" + payments[i].billId == "" + billId) {
+            selectedPayments.push(payments[i]);
+        }
+    }
+    return selectedPayments;
+} 
+
+function selectPersons(payments, persons) {
+    let selectedPersons = [];
+    let paymentsToPersons = [];
+    for (let i = 0; i < payments.length; i++) {
+        for (let j = 0; j < persons.length; j++) {
+            if ("" + persons[j]._id == "" + payments[i].payerId) {
+                selectedPersons.push(persons[j]);
+                paymentsToPersons.push({
+                    payment: mapPayment(payments[i]),
+                    person: mapPerson(persons[j])
+                })
+            }
+        }
+    }
+    return [selectedPersons, paymentsToPersons];
+}
+
+function mapPayments(payments) {
+    const mapedPayments =  payments.map(payment => {
+       return mapPayment(payment);
+    });
+    return mapedPayments;
+}
+
+function mapPersons(persons) {
+    return persons.map(person => {
+        return mapPerson(person);
+    });
+}
+
+function mapPayment(payment) {
+    if (payment) {
+        return {
+            paymentId: payment._id,
+            productName: payment.productName,
+            productPrice: payment.productPrice,
+            payerId: payment.payerId
+        }
+    }
+}
+
+function mapPerson(person) {
+    if (person) {
+        return {
+            id: person._id,
+            name: person.name
+        }
+    }
+}
