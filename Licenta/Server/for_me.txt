@@ -1,0 +1,7 @@
+npm install --save-dev nodemon      ->  ca sa restarteze serverul cand apar schimbari
+npm install --save morgan           ->  pachet pentru log.uri
+npm install --save body-parser      ->  to parse the body of the incoming requests (don't support files)
+npm install --save mongoose         ->  to work easier with MongoDB
+npm install --save multer           ->  parse form data bodys to find files
+
+MongoDB pentru scalabilitate si pentru stocare pe cloud pentru o viitoare implementare serioasa a aplicatiei.

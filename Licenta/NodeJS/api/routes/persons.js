@@ -129,6 +129,29 @@ router.put('/:personId', (req, res, next) => {
 });
 
 
+
+router.delete('/all', (req, res, next) => {
+    Person.find()
+    .exec()
+    .then(docs => {
+        console.log(docs);
+        Person.deleteMany({}).exec().then(result => {
+            res.status(200).json(result);
+        }).catch(err => {
+            console.log(err);
+            res.status(500).json({
+                error: err
+            })
+        });
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json({
+            error: err
+        })
+    });
+});
+
 router.delete('/name/:personName', (req, res, next) => {
     const personName = req.params.personName;
     Person.deleteOne({ name: personName })
